@@ -1,0 +1,51 @@
+using UnityEngine;
+using System.Collections;
+
+public class EnergyScript : MonoBehaviour {
+	
+	//current progress
+	public float barDisplay = 0;
+	public int energy = 0;
+
+
+	
+	public Texture2D emptyTex;
+	public Texture2D fullTex;
+    public GUIStyle customGuiStyle;
+	void OnGUI()
+    {
+        customGuiStyle.fontSize = 30;   
+		//draw the background:
+        GUI.Box(new Rect(80, 40, 310, 90), "Energy: " + energy + "\nLvl completion: " + getLevelCompletion(CharacterControllerScript.CURRENT_LEVEL_LENGTH) + " %", customGuiStyle);
+      
+	}
+	
+	void Update()
+	{
+		GameObject go = GameObject.Find ("Character");
+		Score sc = go.GetComponent<Score>();
+		energy = sc.CurrentScore;
+
+
+
+
+		//Debug.Log("energy");
+		//Debug.Log(sc.CurrentScore);
+
+	}
+
+	public static int getLevelCompletion(int level_length)
+	{
+		int percent = Mathf.RoundToInt (100 * CharacterControllerScript.distanceTraveled / level_length);
+
+		if (percent < 0)
+						return 0;
+				else if (percent > 100)
+						return 100;
+
+		return percent;
+
+	}
+	
+
+}
