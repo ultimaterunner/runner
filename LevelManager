@@ -1,0 +1,68 @@
+using UnityEngine;
+using System.Collections.Generic;
+
+public class LevelManager : MonoBehaviour {
+	
+	public Transform groundPrefab;
+	public int numberOfObjects;
+	public float recycleOffset;
+	public Vector3 startPosition;
+	public Vector3 minSize, maxSize, minGap, maxGap;
+	public float minY, maxY;
+	
+	private Vector3 nextPosition;
+	private Queue<Transform> foodQueue;
+	private Queue<Transform> platformQueue;
+
+	
+	void Start () {
+		platformQueue = new Queue<Transform>(numberOfObjects);
+		foodQueue = new Queue<Transform>(100);
+		for(int i = 0; i < numberOfObjects; i++){
+			platformQueue.Enqueue((Transform)Instantiate(groundPrefab));
+		}
+		nextPosition = startPosition;
+		for(int i = 0; i < numberOfObjects; i++){
+			changePlatform();
+		}
+
+
+
+
+	}
+	
+	void Update () {
+		if(platformQueue.Peek().localPosition.x + recycleOffset < CharacterControllerScript.distanceTraveled){
+			changePlatform();
+		}
+	}
+	
+	private void changePlatform () {
+		Vector3 scale = new Vector3(
+			Random.Range(minSize.x, maxSize.x),
+			Random.Range(minSize.y, maxSize.y),
+			Random.Range(minSize.z, maxSize.z));
+		
+		Vector3 position = nextPosition;
+		position.x += scale.x * Random.Range(0.4f, 0.6f);
+		position.y += scale.y;
+		
+		Transform o = platformQueue.Dequeue();
+		o.localScale = scale;
+		o.localPosition = position;
+		platformQueue.Enqueue(o);
+
+		
+		nextPosition += new Vector3(
+			Random.Range(minGap.x, maxGap.x) + scale.x,
+			Random.Range(minGap.y, maxGap.y),
+			Random.Range(minGap.z, maxGap.z));
+		
+		if(nextPosition.y < minY){
+			nextPosition.y = minY + maxGap.y;
+		}
+		else if(nextPosition.y > maxY){
+			nextPosition.y = maxY - maxGap.y;
+		}
+	}
+}
