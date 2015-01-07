@@ -1,0 +1,231 @@
+using UnityEngine;
+using System.Collections;
+
+public class CharacterControllerScript : MonoBehaviour {
+
+	public static int Level1_length = 300;
+	public static int Level2_length = 500;
+	public static int CURRENT_LEVEL_LENGTH;
+
+
+
+	bool paused = false;
+	bool completedLevel = false;
+
+	public float maxSpeed = 10f;
+	bool facingRight = true;
+
+	Animator anim;
+
+	bool grounded = false;
+	public Transform groundCheck;
+	private bool groundTouch;
+	float groundRadius = 0.2f;
+
+	public LayerMask whatIsGround;
+	public float jumpForce = 5f;
+	public int energy = 1000;
+	public Score score;
+	public static float distanceTraveled; //x koordinate kiek nukeliavo
+	public GUISkin customSkin1;
+	public GUISkin defaultSkin;
+	string name = "";
+  
+
+	bool highScoreReached = false;
+
+	void Start () 
+	{
+		CURRENT_LEVEL_LENGTH = Level1_length;
+		groundTouch = true;
+		anim = GetComponent<Animator> ();
+		updateEnergy (1000);
+        Screen.autorotateToPortrait = false;
+
+        Screen.autorotateToPortraitUpsideDown = false;
+
+        Screen.orientation = ScreenOrientation.AutoRotation;
+
+	}
+
+	void updateEnergy(int what)
+	{
+		score.CurrentScore += what;
+	}
+
+	// Update is called once per frame
+	void FixedUpdate () 
+	{
+		grounded = Physics2D.OverlapCircle (groundCheck.position, groundRadius, whatIsGround);
+		anim.SetBool ("Ground", grounded);
+
+        float move = 1;
+
+        anim.SetFloat("Speed", Mathf.Abs(move));
+
+
+
+        rigidbody2D.velocity = new Vector2(move * maxSpeed, rigidbody2D.velocity.y);
+
+		distanceTraveled = transform.localPosition.x;
+		
+		//Debug.Log (transform.localPosition.y + "  "+facingRight);
+
+
+	}
+
+	void OnGUI ()
+	{
+		GUI.skin = customSkin1;
+
+		if (completedLevel) {
+			if(Application.loadedLevel != 2)
+			{
+				GUI.Box (new Rect (0, 0, Screen.width, Screen.height), "");
+				GUI.Label (new Rect (Screen.width / 2 - 50, Screen.height / 2 - Screen.height / 3, Screen.width / 3, 80), "Level completed!");
+				string sveikinimas = "Congragulations!";
+				highScoreReached = false;
+				if(HighScoreManager._instance.CheckNewHighScore(score.CurrentScore))
+				{
+					sveikinimas = "New high score!";
+					highScoreReached = true;
+				}
+
+				GUI.Label (new Rect (Screen.width / 2 - 50, Screen.height / 2 - Screen.height / 3+Screen.height/11, Screen.width / 3, 80), sveikinimas);
+				GUI.Label (new Rect (Screen.width / 2 - 50, Screen.height / 2 - Screen.height / 3+Screen.height/10+50, Screen.width / 3, 80), "You have "+score.CurrentScore+" EP");
+				if(highScoreReached)
+				{
+					GUI.skin = defaultSkin;
+					GUI.Window(0, new Rect((Screen.width/2)-150, (Screen.height/2)-75
+					                       , 300, 250), ShowGUI, "New high score!");
+				}
+
+				
+				if (GUI.Button (new Rect (Screen.width / 2 - 50, Screen.height / 2 + 50, Screen.width / 3, 50), "Continue")) {
+					Time.timeScale = 1.0f;
+					paused = false; 
+					Application.LoadLevel ("level2");
+					CURRENT_LEVEL_LENGTH = Level2_length;
+					completedLevel = false;
+
+				}
+			
+				//and quit button
+				if (GUI.Button (new Rect (Screen.width / 2 - 50, Screen.height / 2 + 100, Screen.width / 3, 50), "Main Menu")) {
+					Time.timeScale = 1.0f;	
+					paused = false; 
+					Application.LoadLevel("start");
+				}
+			}
+		}
+		if (paused) {
+						
+						GUI.Box (new Rect (0, 0, Screen.width, Screen.height), "");
+						GUI.Label (new Rect (Screen.width / 2 - 50, Screen.height / 2 - Screen.height / 3, Screen.width / 3, 80), "Pause");
+
+						if (GUI.Button (new Rect (Screen.width / 2 - 50, Screen.height / 2 + 50, Screen.width / 3, 50), "Continue")) {
+							Time.timeScale = 1.0f;
+							paused = false; 
+						}
+		
+						//and quit button
+						if (GUI.Button (new Rect (Screen.width / 2 - 50, Screen.height / 2 + 100, Screen.width / 3, 50), "Main Menu")) {
+							Time.timeScale = 1.0f;	
+							paused = false; 
+							Application.LoadLevel("start");
+						}
+
+				}
+		
+		
+	}
+
+
+	void ShowGUI(int windowID)
+	{
+		// You may put a label to show a message to the player
+		//GUI.Box (new Rect (0, 0, 300, 300), "asdasd");
+		GUI.Label(new Rect(65, 40, 200, 30), "<size=13>Enter your name:</size>");
+
+		name = GUI.TextField(new Rect(65, 60, 200, 30), name, 10);
+		//name = GUILayout.TextField(name);
+		if (GUI.Button(new Rect(50, 150, 75, 30), "Save"))
+		{
+			HighScoreManager._instance.SaveHighScore(name, score.CurrentScore);
+			HighScoreManager._instance.GetHighScore();
+			highScoreReached = false;
+			name = "";
+		}
+
+		if (GUI.Button(new Rect(150, 150, 75, 30), "Cancel"))
+		{
+			highScoreReached = false;
+
+		}
+		
+	}
+				
+	void Update()
+	{
+		if( Input.GetKeyDown(KeyCode.Escape))
+		{
+			paused = !paused;
+			if(paused)
+				Time.timeScale = 0.0f;
+			else
+				Time.timeScale = 1.0f;
+		}
+
+
+
+        if (grounded && !completedLevel)
+            groundTouch = true;
+        if (groundTouch && grounded && (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space)))
+        {
+            anim.SetBool("Ground", false);
+            updateEnergy(-50);
+            rigidbody2D.AddForce(new Vector2(120, jumpForce));
+            groundTouch = false;
+        }
+
+
+
+        if (grounded && !completedLevel)
+            groundTouch = true;
+        if (groundTouch && grounded && (Input.acceleration.z > 0.1))
+        {
+            anim.SetBool("Ground", false);
+            updateEnergy(-5);
+            rigidbody2D.AddForce(new Vector2(150, jumpForce));
+            groundTouch = false;
+        }
+
+
+		if (EnergyScript.getLevelCompletion (CURRENT_LEVEL_LENGTH) == 100) { //level completed
+			completedLevel = true;			
+			distanceTraveled = 0;
+			//Application.LoadLevel ("level2");
+						CURRENT_LEVEL_LENGTH = Level2_length;
+		} else
+			if (transform.localPosition.y < -5) { //nukrito y duobe
+						Application.LoadLevel ("gameover");
+			distanceTraveled = 0;
+						
+				} else if (score.CurrentScore == 0) { //pasibaige energija
+						distanceTraveled = 0;
+						Application.LoadLevel ("gameover");
+						CURRENT_LEVEL_LENGTH = Level1_length;
+				}
+	}
+
+	void Flip()
+	{
+		facingRight = !facingRight;
+		Vector3 theScale = transform.localScale;
+		theScale.x *= -1;
+		transform.localScale = theScale;
+	}
+
+
+
+}
