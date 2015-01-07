@@ -1,0 +1,40 @@
+using UnityEngine;
+using System.Collections;
+
+public class GameOver : MonoBehaviour {
+	int score = 0;
+	public GUISkin customSkin1;
+	
+	// Use this for initialization
+	void Start () {
+	}
+	
+	void OnGUI(){
+		GUI.skin = customSkin1;
+		GUI.Box(new Rect(0,0,Screen.width,Screen.height),"");
+		GUI.Label (new Rect(Screen.width/2-50,Screen.height/2 - Screen.height/3,Screen.width/3,80), "GAME OVER");
+
+		//GameObject go = GameObject.Find ("Character");
+		//Score sc = go.GetComponent<Score>();
+		//int energy = sc.CurrentScore;
+		//Debug.Log (energy);
+
+		//set our text to our score
+		//gui.guiText.text = score.ToString ();
+		//if retry button is pressed load scene 0 the game
+		if(GUI.Button(new Rect(Screen.width/2-50,Screen.height/2 +150,Screen.width/3,50),"Retry?")){
+			Application.LoadLevel("finalscene");
+		}
+
+		//and quit button
+		if(GUI.Button(new Rect(Screen.width/2-50,Screen.height/2 +200,Screen.width/3,50),"Main Menu")){
+			Application.LoadLevel("start");
+		}
+
+		//and quit button
+		if(GUI.Button(new Rect(Screen.width/2-50,Screen.height/2 +250,Screen.width/3,50),"Quit")){
+			Application.Quit();
+		}
+	}
+	
+}
