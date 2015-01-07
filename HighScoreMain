@@ -1,0 +1,90 @@
+using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+
+public class HighScoreMain : MonoBehaviour {
+	public GUISkin customSkin1;
+	string name="";
+	string score="";
+	List<Scores> highscore;
+	
+	// Use this for initialization
+	void Start () {
+		//HighScoreManager._instance._buttonClick += ButtonClicked;
+		
+		highscore = new List<Scores>();
+		
+	}
+	
+	
+	void ButtonClicked(GameObject _obj)
+	{
+		print("Clicked button:"+_obj.name);
+	}
+	
+	// Update is called once per frame
+	void Update () {
+		
+	}
+	
+	void OnGUI()
+	{
+		GUI.skin = customSkin1;
+		GUI.Box(new Rect(0,0,Screen.width,Screen.height),"");
+
+		if (GUI.Button (new Rect (Screen.width / 2 + Screen.width / 3, Screen.height / 2 + Screen.height / 3, 120, 70), "<size=19>Go to menu</size>")) {
+			Application.LoadLevel("start");
+		}
+
+		GUI.Label (new Rect(Screen.width/2-50,Screen.height/2 - Screen.height/3-20,Screen.width/3,80), "High Scores");
+
+//		GUILayout.BeginHorizontal();
+//		GUILayout.Label("<size=20>Your name:</size>");
+//		name = GUILayout.TextField(name);
+//		GUILayout.EndHorizontal();
+//		
+//		GUILayout.BeginHorizontal();
+//		GUILayout.Label("Score :");
+//		score = GUILayout.TextField(score);
+//		GUILayout.EndHorizontal();
+//		
+//		if(GUILayout.Button("Add Score"))
+//		{
+//			HighScoreManager._instance.SaveHighScore(name,System.Int32.Parse(score));
+//			highscore = HighScoreManager._instance.GetHighScore();
+//		}
+//		
+//		if(GUILayout.Button("Get LeaderBoard"))
+//		{
+//			highscore = HighScoreManager._instance.GetHighScore();
+//		}
+//		
+//		if(GUILayout.Button("Clear Leaderboard"))
+//		{
+//			HighScoreManager._instance.ClearLeaderBoard();
+//		}		
+		//HighScoreManager._instance.ClearLeaderBoard();
+
+		highscore = HighScoreManager._instance.GetHighScore();
+
+
+		int diff = 50+40;
+		int i = 0;
+		if (highscore.Count > 0) {
+			GUI.Label(new Rect(Screen.width/2-190,Screen.height/2 - Screen.height/3+50,Screen.width/3,80), "<size=30>Nr.</size>");
+			GUI.Label(new Rect(Screen.width/2-90,Screen.height/2 - Screen.height/3+50,Screen.width/3,80), "<size=30>Name</size>");
+			GUI.Label(new Rect(Screen.width/2+100,Screen.height/2 - Screen.height/3+50,Screen.width/3,80), "<size=30>Score</size>");
+
+						foreach (Scores _score in highscore) {
+								i++;
+								GUI.Label (new Rect (Screen.width / 2 - 190, Screen.height / 2 - Screen.height / 3 + diff, Screen.width / 3, 80), "<size=30>" + i + ".</size>");
+								GUI.Label (new Rect (Screen.width / 2 - 90, Screen.height / 2 - Screen.height / 3 + diff, Screen.width / 3, 80), "<size=30>" + _score.name + "</size>");
+								GUI.Label (new Rect (Screen.width / 2 + 100, Screen.height / 2 - Screen.height / 3 + diff, Screen.width / 3, 80), "<size=30>" + _score.score + "</size>");
+								diff += 30;
+						}
+				} else {
+			GUI.Label (new Rect(Screen.width/2-50,Screen.height/2 - Screen.height/3+100,Screen.width/3,80), "<size=30>No high scores yet...</size>");
+
+		}
+	}
+}
